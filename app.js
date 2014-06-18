@@ -6,11 +6,12 @@
 var express = require('express'),
   bodyParser = require('body-parser'),
   methodOverride = require('method-override'),
-  errorHandler = require('error-handler'),
+  errorhandler = require('errorhandler'),
   morgan = require('morgan'),
   routes = require('./routes'),
   api = require('./routes/api'),
   http = require('http'),
+  stylus = require('stylus'),
   path = require('path');
 
 var app = module.exports = express();
@@ -24,6 +25,15 @@ var app = module.exports = express();
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+app.use('/css', stylus.middleware({
+  src: __dirname + '/stylus',
+  dest: __dirname + '/public/css',
+  compile: function (str, path) {
+    return stylus(str)
+      .set('filename', path)
+      .set('compress', true);
+  }
+}));
 app.use(morgan('dev'));
 app.use(bodyParser());
 app.use(methodOverride());
@@ -33,7 +43,7 @@ var env = process.env.NODE_ENV || 'development';
 
 // development only
 if (env === 'development') {
-  app.use(express.errorHandler());
+  app.use(errorhandler());
 }
 
 // production only
